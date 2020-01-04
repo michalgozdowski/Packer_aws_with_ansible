@@ -1,0 +1,40 @@
+- hosts: all
+  become: yes
+
+  tasks:
+  - name: Update repositories
+    apt: update_cache=yes
+
+  - name: Install necessary packages
+    apt: 
+      name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+      state: present
+ 
+  - name: Get Docker's official GPG key
+    get_url:
+     url: https://download.docker.com/linux/ubuntu/gpg
+     dest: ~/docker_gpg_key.key
+     mode: '0440'
+  
+  - name: Add Docker's official GPG key to apt  
+    command: apt-key add ~/docker_gpg_key.key
+    
+  - name: Work out the distribution
+    command: lsb_release -sc
+    register: result
+
+  - name: Add repository to existing repositories
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ result.stdout }} stable
+      state: present
+  
+  - name: Update repositories
+    apt: update_cache=yes
+
+  - name: Install main docker packages
+    apt: 
+     name: ["docker-ce", "docker-ce-cli", "containerd.io"]
+     state: present
+
+  - name: Add default user to docker group
+    command: usermod -aG docker ubuntu

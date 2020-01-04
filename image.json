@@ -1,0 +1,31 @@
+{
+    "variables" : {
+        "region" : "eu-central-1"
+    },
+    "builders" : [
+        {
+            "type" : "amazon-ebs",
+            "region" : "{{user `region`}}",
+            "instance_type" : "t2.micro",
+            "source_ami" : "ami-0cc0a36f626a4fdf5",
+            "ssh_username" : "ubuntu",
+            "ami_name" : "ubuntu-18.04-docker",
+            "ami_description" : "Ubuntu Server with Docker",
+            "run_tags" : {
+                "Name" : "packer-aws-ansible",
+                "Tool" : "Packer",
+                "Author" : "galanonymous"
+            }
+        }
+    ],
+    "provisioners" : [
+        {
+            "type" : "shell",
+            "script" : "./ansible_script.sh"
+        },
+        {
+            "type" : "ansible",
+            "playbook_file" : "./playbook.yml"
+        }
+    ]
+}
